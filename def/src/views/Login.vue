@@ -1,6 +1,9 @@
 <template>
-  <div id="login">
-    <el-form ref="loginForm" :rules="rules" :model="loginForm" class="loginContainer">
+  <div id="login" >
+    <el-form ref="loginForm"
+             :rules="rules"
+             :model="loginForm"
+             class="loginContainer">
       <h3 class="loginTitle">系统登录</h3>
       <el-form-item prop="username">
         <el-input  type="text" v-model="loginForm.username" placeholder="请输入用户名"></el-input>
@@ -9,10 +12,10 @@
         <el-input  type="password" auto-complete="false" v-model="loginForm.password" placeholder="请输入密码"></el-input>
       </el-form-item>
       <el-form-item prop="code">
-        <el-input style="width: 250px;margin-left: 5px;" type="test" auto-complete="false" v-model="loginForm.code"
+        <el-input style="width: 250px;margin: 5px;" type="test" auto-complete="false" v-model="loginForm.code"
                   placeholder="点击图片更换验证码"></el-input>
+        <img :src="captchaUrl" @click="updateCaptcha">
       </el-form-item>
-      <img :src="captchaUrl">
       <el-checkbox v-model="checked" class="loginRemember">记住我</el-checkbox>
       <el-button type="primary" style="width: 100%;" @click="submitLogin">登录</el-button>
     </el-form>
@@ -20,16 +23,18 @@
 </template>
 
 <script>
+
   export default {
     name: "Login",
     data() {
       return {
-        captchaUrl: '',
+        captchaUrl: '/captcha?time'+new Date(),
         loginForm: {
           username: 'admin',
-          password: '123',
+          password: '123456',
           code: ''
         },
+        loading: false,
         checked: false,
         rules: {
           username: [{required: true, message: "请输入用户名", trigger: "blur"}],
@@ -42,12 +47,23 @@
       submitLogin() {
         this.$refs.loginForm.validate((valid) => {
           if (valid) {
-            alert('submit!');
+            this.loading=true
+            this.postRequest('/login',this.loginForm).then(resp=>{
+              if (resp){
+                this.loading=false
+                const tokenStr = resp.obj.tokenhead+resp.obj.token;
+                window.sessionStorage.setItem('tokenStr',tokenStr);
+                this.$router.replace('/home')
+              }
+            })
           } else {
             this.$message.error("请输入所有字段！")
             return false;
           }
         });
+      },
+      updateCaptcha(){
+        this.captchaUrl = '/captcha?time'+new Date();
       }
     }
   }
@@ -73,5 +89,9 @@
   .loginRemember {
     text-align: left;
     margin: 0 0 5px 0;
+  }
+  .el-form-item__content{
+    display: flex;
+    align-items: center;
   }
 </style>
