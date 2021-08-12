@@ -51,7 +51,7 @@
             this.postRequest('/login',this.loginForm).then(resp=>{
               if (resp){
                 this.loading=false
-                const tokenStr = resp.obj.tokenhead+resp.obj.token;
+                const tokenStr = resp.obj.tokenHead+resp.obj.token;
                 window.sessionStorage.setItem('tokenStr',tokenStr);
                 this.$router.replace('/home')
               }
